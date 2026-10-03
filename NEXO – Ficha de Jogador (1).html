@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NEXO – Ficha de Jogador</title>
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f1f0ec;--card:#fbfaf7;--ink:#0c0c0c;--mute:#5d6066;--line:#0c0c0c;--acc:#c4161c;--soft:#e3e1da;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101112;--card:#18191b;--ink:#ecebe6;--mute:#9a9da3;--line:#ecebe6;--acc:#ff4a4f;--soft:#26282b}}
+:root[data-theme="dark"]{--bg:#101112;--card:#18191b;--ink:#ecebe6;--mute:#9a9da3;--line:#ecebe6;--acc:#ff4a4f;--soft:#26282b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:600 16px/1.35 Rajdhani,system-ui,sans-serif}
+h1,h2,h3{font-family:Teko,Impact,sans-serif;font-weight:700;margin:0;line-height:1}
+main{max-width:1100px;margin:0 auto;padding:16px}
+header{display:flex;gap:16px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+h1{font-size:clamp(64px,14vw,120px);letter-spacing:2px}
+.chain{height:14px;margin:6px 0 18px;opacity:.8;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='14'%3E%3Cellipse cx='11' cy='7' rx='12' ry='5' fill='none' stroke='%23888' stroke-width='2'/%3E%3C/svg%3E") repeat-x}
+section{background:var(--card);border:2px solid var(--line);padding:14px;margin-bottom:16px}
+h2{font-size:36px;margin-bottom:8px}
+h3{font-size:26px;margin:10px 0 4px}
+.grid{display:grid;gap:12px}
+.id{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+label{display:flex;flex-direction:column;font-size:14px;color:var(--mute);gap:2px}
+input,select,textarea,button{font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line);padding:6px 8px;border-radius:0;min-width:0}
+input[type=number]{width:100%}
+button{cursor:pointer;background:var(--ink);color:var(--bg);font-weight:700}
+button.ghost{background:transparent;color:var(--ink)}
+button:disabled{opacity:.35;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.tbl{width:100%;border-collapse:collapse;display:block;overflow-x:auto}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:center;white-space:nowrap}
+.tbl td:first-child{text-align:left;font-weight:700}
+.tbl input{width:72px;text-align:center}
+.rank{font:700 28px Teko,sans-serif}
+.rank.S,.rank.A{color:var(--acc)}
+.two{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.p{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid var(--soft);padding:4px 0}
+.p input{width:64px;text-align:center}
+.p.arma b{color:var(--acc)}
+.note{color:var(--mute);font-size:14px;margin:4px 0}
+.bad{color:var(--acc)}
+.big{font:700 44px Teko,sans-serif}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.die{min-width:48px;font:700 22px Teko,sans-serif;background:var(--bg);color:var(--ink)}
+.die.used{opacity:.45}
+.chip{background:var(--bg);color:var(--ink)}
+.chip.sel{background:var(--acc);color:#fff;border-color:var(--acc)}
+.pip{width:44px;height:44px;border-radius:50%;background:var(--bg)}
+.pip.on{background:var(--acc);border-color:var(--acc)}
+.log{max-height:240px;overflow:auto;margin:0;padding:0;list-style:none}
+.log li{border-bottom:1px solid var(--soft);padding:4px 0}
+.xpbar{height:14px;border:2px solid var(--line);background:var(--bg)}
+.xpbar i{display:block;height:100%;background:var(--acc)}
+.cls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.cls button{background:var(--bg);color:var(--ink);text-align:left;padding:10px}
+.cls button.sel{background:var(--ink);color:var(--bg)}
+.cls small{display:block;font-weight:500;opacity:.8}
+textarea{width:100%;min-height:110px}
+</style>
+</head>
+<body>
+<main>
+<header>
+ <h1>NEXO</h1>
+ <div class="row"><button class="ghost" id="tema">Tema</button><button class="ghost" id="reset">Zerar ficha</button></div>
+</header>
+<div class="chain"></div>
+
+<section>
+ <h2>Jogador</h2>
+ <div class="grid id">
+  <label>Nome do personagem<input id="nome"></label>
+  <label>Jogador<input id="jogador"></label>
+  <label>Posição / classe<span id="clsNome" class="big">—</span></label>
+  <label>Nível<span id="nivel" class="big">1</span></label>
+ </div>
+ <div class="grid id" style="margin-top:10px">
+  <label>XP total<input type="number" id="xp" min="0" step="100"></label>
+  <label>Progresso do nível <span id="xpTxt"></span><div class="xpbar"><i id="xpFill"></i></div></label>
+  <label>Fase <span id="fase" class="big" style="font-size:30px"></span></label>
+ </div>
+ <div class="row" style="margin-top:10px">
+  <span class="note">Registrar atos (+100 XP cada):</span>
+  <button data-xp="gols">Gol <span id="c_gols">0</span></button>
+  <button data-xp="assist">Assistência <span id="c_assist">0</span></button>
+  <button data-xp="defesas">Defesa <span id="c_defesas">0</span></button>
+  <button class="ghost" id="xpUndo">Desfazer último</button>
+ </div>
+ <p class="note" id="prog"></p>
+</section>
+
+<section>
+ <h2>Criar atributos</h2>
+ <p class="note">Role 5d20 e some. Você pode trocar um dado rolando de novo, mas só uma vez e antes de guardar o valor. Repita para os seis valores e escolha onde colocar cada um.</p>
+ <div class="row"><button id="roll5">Rolar 5d20</button><span id="dice" class="row"></span><b id="diceSum" class="big"></b><button id="keep" class="ghost" disabled>Guardar valor</button></div>
+ <p class="note">Valores guardados (toque para selecionar, depois use “←” no atributo):</p>
+ <div class="row" id="pool"></div>
+</section>
+
+<section>
+ <h2>Atributos</h2>
+ <table class="tbl">
+  <thead><tr><th>Atributo</th><th>Base</th><th>Extra</th><th>Classe</th><th>Total</th><th>Rank</th><th>Bônus no teste</th><th></th></tr></thead>
+  <tbody id="attrs"></tbody>
+ </table>
+ <p class="note">Extra: pontos ganhos por progressão ou outros efeitos. Classe: bônus automático da classe escolhida.</p>
+</section>
+
+<section>
+ <h2>Classe</h2>
+ <div class="cls" id="classes"></div>
+</section>
+
+<section>
+ <h2>Combate e ações</h2>
+ <div class="grid id">
+  <label>Movimento base<span class="big"><span id="mov">4</span> m</span></label>
+  <label>Ação<span>Ação principal + movimento</span></label>
+  <label>Reação (1 por rodada)<button id="reacao" class="ghost">Disponível</button></label>
+ </div>
+ <h3>Fluxo</h3>
+ <p class="note">Ganhe pontos ao fazer jogadas relevantes para o seu estilo. Com 4 pontos o Fluxo ativa: +10 em 3 atributos à sua escolha.</p>
+ <div class="row" id="pips"></div>
+ <div class="row" id="fluxoAttrs" style="margin-top:8px"></div>
+ <p id="fluxoMsg" class="note"></p>
+</section>
+
+<section>
+ <h2>Parâmetros</h2>
+ <p class="note">Pontos gastos: <b id="spent">0</b> / <b id="total">20</b> · <span id="lim">Limite de 5 por parâmetro</span></p>
+ <div class="grid two" id="params"></div>
+</section>
+
+<section>
+ <h2>Arma</h2>
+ <p class="note">Escolha um tipo de parâmetro. O mestre sorteia um parâmetro daquele tipo, que recebe +5.</p>
+ <div class="row">
+  <label>Tipo<select id="armaTipo"></select></label>
+  <label>Parâmetro sorteado<select id="armaPar"></select></label>
+  <button id="sortear" class="ghost">Sortear</button>
+ </div>
+</section>
+
+<section>
+ <h2>Teste</h2>
+ <p class="note">d20 + Parâmetro + bônus do atributo (buff de classe + bônus do rank), e +10 se o atributo estiver no Fluxo ativo. O valor total do atributo só define o rank.</p>
+ <div class="row">
+  <label>Atributo<select id="tAttr"></select></label>
+  <label>Parâmetro<select id="tPar"></select></label>
+  <button id="testar">Rolar teste</button>
+ </div>
+ <p id="tRes" class="big"></p>
+ <ul class="log" id="log"></ul>
+</section>
+
+<section>
+ <h2>Anotações</h2>
+ <textarea id="notas" placeholder="História, objetivos, lesões, rivalidades..."></textarea>
+</section>
+</main>
+
+<script>
+const A=['Velocidade','Defesa','Passe','Drible','Chute','Ofensiva'];
+const P={
+ 'Chute':['Potência do Chute','Passe Curto','Passe Longo','Bola Parada','Voleio','Chute de Longe','Cruzamento'],
+ 'Físico':['Stamina','Aceleração','Salto','Reação','Força','Equilíbrio'],
+ 'Mental':['Calma','Assertividade','Consciência Ofensiva','Consciência Defensiva','Coordenação','Compreensão Tática'],
+ 'Técnica':['Domínio','Cabeceio','Drible','Desarme','Carrinho','Posicionamento']};
+const ALLP=Object.values(P).flat();
+const C={ATA:{n:'ATA (Atacante)',d:'Finalização e criação de oportunidades',b:{Chute:2,Ofensiva:1}},
+ MEI:{n:'MEI (Meio campo)',d:'Criação, distribuição e leitura do jogo',b:{Passe:2,Ofensiva:1}},
+ ZAG:{n:'ZAG (Zagueiro)',d:'Impedir avanços e proteger a defesa',b:{Defesa:2,Velocidade:1}}};
+const RK=[[90,'S',10],[80,'A',5],[70,'B',2],[60,'C',1],[50,'D',0],[40,'E',-1],[30,'F',-2],[0,'G',-5]];
+const rank=v=>RK.find(r=>v>=r[0]);
+const fresh=()=>({nome:'',jogador:'',classe:'',xp:0,cnt:{gols:0,assist:0,defesas:0},hist:[],base:{},extra:{},par:{},fluxo:0,fAttrs:[],reacao:false,arma:{tipo:'',par:''},dice:null,pool:[],sel:-1,log:[],notas:''});
+let S=fresh();
+try{const s=localStorage.getItem('nexo-ficha');if(s)S=Object.assign(fresh(),JSON.parse(s))}catch(e){}
+const $=id=>document.getElementById(id);
+const save=()=>{try{localStorage.setItem('nexo-ficha',JSON.stringify(S))}catch(e){}};
+const d=n=>1+Math.floor(Math.random()*n);
+const nivel=()=>Math.min(12,1+Math.floor(S.xp/1000));
+const buff=a=>(C[S.classe]?.b[a])||0;
+const total=a=>(+S.base[a]||0)+(+S.extra[a]||0)+buff(a);
+const fluxoOn=()=>S.fluxo>=4;
+const pv=p=>(+S.par[p]||0)+(S.arma.par===p?5:0);
+const optA=(el,sel)=>{el.innerHTML=A.map(a=>`<option>${a}</option>`).join('')};
+
+// Build static parts
+$('attrs').innerHTML=A.map(a=>`<tr><td>${a}</td>
+<td><input type="number" min="0" max="100" data-b="${a}"></td>
+<td><input type="number" data-e="${a}"></td>
+<td id="cb_${a}"></td><td id="t_${a}"><b></b></td>
+<td id="r_${a}" class="rank"></td><td id="bn_${a}"></td>
+<td><button class="ghost" data-use="${a}" title="Usar valor selecionado">←</button></td></tr>`).join('');
+$('classes').innerHTML=Object.entries(C).map(([k,c])=>`<button data-c="${k}"><b>${c.n}</b><small>${c.d}</small><small>Buff: ${Object.entries(c.b).map(([a,v])=>'+'+v+' '+a).join(' e ')}</small></button>`).join('');
+$('params').innerHTML=Object.entries(P).map(([g,l])=>`<div><h3>${g}</h3>${l.map(p=>`<div class="p" id="pr_${p}"><span>${p}</span><span class="row"><b class="arm"></b><input type="number" min="0" data-p="${p}"></span></div>`).join('')}</div>`).join('');
+$('armaTipo').innerHTML='<option value="">—</option>'+Object.keys(P).map(g=>`<option>${g}</option>`).join('');
+optA($('tAttr'));
+$('tPar').innerHTML='<option value="">(sem parâmetro)</option>'+Object.entries(P).map(([g,l])=>`<optgroup label="${g}">${l.map(p=>`<option>${p}</option>`).join('')}</optgroup>`).join('');
+$('pips').innerHTML=[1,2,3,4].map(i=>`<button class="pip" data-pip="${i}" aria-label="Fluxo ${i}"></button>`).join('')+'<button class="ghost" id="fzero">Zerar</button>';
+
+function renderArmaPar(){
+ const l=S.arma.tipo?P[S.arma.tipo]:[];
+ $('armaPar').innerHTML='<option value="">—</option>'+l.map(p=>`<option>${p}</option>`).join('');
+ $('armaPar').value=S.arma.par;
+}
+function renderDice(){
+ const x=S.dice;
+ $('dice').innerHTML=x?x.v.map((v,i)=>`<button class="die ${x.r&&x.r!==i+1?'':''}" data-d="${i}" ${x.r?'disabled':''} title="Rolar de novo (1 vez)">${v}</button>`).join(''):'';
+ $('diceSum').textContent=x?'= '+x.v.reduce((a,b)=>a+b,0):'';
+ $('keep').disabled=!x;$('roll5').disabled=!!x||S.pool.length>=6;
+}
+function renderPool(){
+ $('pool').innerHTML=S.pool.map((v,i)=>`<button class="chip ${S.sel===i?'sel':''}" data-pool="${i}">${v}</button>`).join('')||'<span class="note">Nenhum valor guardado.</span>';
+ if(S.pool.length)$('pool').innerHTML+='<button class="ghost" id="poolClr">Limpar</button>';
+}
+function renderLog(){$('log').innerHTML=S.log.map(l=>`<li>${l}</li>`).join('')}
+function renderFluxo(){
+ document.querySelectorAll('.pip').forEach(b=>b.classList.toggle('on',+b.dataset.pip<=S.fluxo));
+ $('fluxoAttrs').innerHTML=fluxoOn()?A.map(a=>`<label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" data-fa="${a}" ${S.fAttrs.includes(a)?'checked':''}> ${a} </label>`).join(''):'';
+ $('fluxoMsg').textContent=fluxoOn()?`Fluxo ATIVO: +10 em ${S.fAttrs.length}/3 atributos escolhidos.`:`Faltam ${4-S.fluxo} ponto(s) para ativar.`;
+ $('fluxoMsg').className=fluxoOn()?'note bad':'note';
+}
+function update(){
+ const lv=nivel();
+ $('nivel').textContent=lv;
+ $('fase').textContent=lv<=4?'Desenvolvimento':lv<=9?'Especialização':'Excelência';
+ const into=lv>=12?1000:S.xp%1000;
+ $('xpTxt').textContent=lv>=12?'(nível máximo)':`${into}/1000`;
+ $('xpFill').style.width=(into/10)+'%';
+ for(const k of ['gols','assist','defesas'])$('c_'+k).textContent=S.cnt[k];
+ const up=lv-1;
+ let atr=0,par=0;
+ for(let l=2;l<=lv;l++){ if(l<=4)atr+=0; else if(l<=9){atr+=3;par+=2} else {atr+=5;par+=2} }
+ $('prog').textContent=`Ganhos de progressão até aqui: níveis 1–4 dão +2 em cada atributo (${Math.min(up,3)>0?'lance +'+(2)+' no Extra de cada atributo a cada nível ganho':'nada ainda'}); pontos livres de atributo: ${atr}; pontos de parâmetro extras: ${par}.`;
+ A.forEach(a=>{
+  const t=total(a),r=rank(t);
+  $('cb_'+a).textContent=buff(a)?'+'+buff(a):'—';
+  $('t_'+a).firstChild.textContent=t;
+  $('r_'+a).textContent=r[1];$('r_'+a).className='rank '+r[1];
+  $('bn_'+a).textContent=(r[2]>0?'+':'')+r[2]+(fluxoOn()&&S.fAttrs.includes(a)?' (+10 Fluxo)':'');
+ });
+ document.querySelectorAll('[data-c]').forEach(b=>b.classList.toggle('sel',b.dataset.c===S.classe));
+ $('clsNome').textContent=C[S.classe]?C[S.classe].n:'—';
+ $('mov').textContent=4+Math.floor((total('Velocidade')+(fluxoOn()&&S.fAttrs.includes('Velocidade')?10:0))/10);
+ const spent=Object.values(S.par).reduce((a,b)=>a+(+b||0),0),tot=20+par;
+ $('spent').textContent=spent;$('total').textContent=tot;
+ $('spent').className=spent>tot?'bad':'';
+ $('lim').textContent=lv>=5?'Sem limite por parâmetro':'Limite de 5 por parâmetro';
+ ALLP.forEach(p=>{const el=$('pr_'+p);el.classList.toggle('arma',S.arma.par===p);el.querySelector('.arm').textContent=S.arma.par===p?'+5':''});
+ $('reacao').textContent=S.reacao?'Usada nesta rodada':'Disponível';
+ $('reacao').className=S.reacao?'':'ghost';
+ renderFluxo();save();
+}
+function sync(){
+ $('nome').value=S.nome;$('jogador').value=S.jogador;$('xp').value=S.xp;$('notas').value=S.notas;
+ document.querySelectorAll('[data-b]').forEach(i=>i.value=S.base[i.dataset.b]??'');
+ document.querySelectorAll('[data-e]').forEach(i=>i.value=S.extra[i.dataset.e]??'');
+ document.querySelectorAll('[data-p]').forEach(i=>i.value=S.par[i.dataset.p]??'');
+ $('armaTipo').value=S.arma.tipo;renderArmaPar();renderDice();renderPool();renderLog();update();
+}
+
+// Events
+document.addEventListener('input',e=>{
+ const t=e.target;
+ if(t.id==='nome')S.nome=t.value; else if(t.id==='jogador')S.jogador=t.value;
+ else if(t.id==='notas')S.notas=t.value;
+ else if(t.id==='xp')S.xp=Math.max(0,+t.value||0);
+ else if(t.dataset.b)S.base[t.dataset.b]=t.value===''?'':Math.max(0,Math.min(100,+t.value));
+ else if(t.dataset.e)S.extra[t.dataset.e]=t.value===''?'':+t.value;
+ else if(t.dataset.p){let v=Math.max(0,+t.value||0);if(nivel()<5)v=Math.min(5,v);S.par[t.dataset.p]=v;if(+t.value>v)t.value=v}
+ update();
+});
+document.addEventListener('change',e=>{
+ const t=e.target;
+ if(t.id==='armaTipo'){S.arma={tipo:t.value,par:''};renderArmaPar();update()}
+ if(t.id==='armaPar'){S.arma.par=t.value;update()}
+ if(t.dataset.fa){
+  if(t.checked&&S.fAttrs.length>=3){t.checked=false;return}
+  S.fAttrs=t.checked?[...S.fAttrs,t.dataset.fa]:S.fAttrs.filter(x=>x!==t.dataset.fa);update();
+ }
+});
+document.addEventListener('click',e=>{
+ const t=e.target.closest('button');if(!t)return;
+ if(t.dataset.c){S.classe=S.classe===t.dataset.c?'':t.dataset.c;update()}
+ else if(t.dataset.xp){const k=t.dataset.xp;S.cnt[k]++;S.xp+=100;S.hist.push(k);$('xp').value=S.xp;update()}
+ else if(t.id==='xpUndo'){const k=S.hist.pop();if(k){S.cnt[k]--;S.xp=Math.max(0,S.xp-100);$('xp').value=S.xp;update()}}
+ else if(t.id==='roll5'){S.dice={v:[d(20),d(20),d(20),d(20),d(20)],r:false};renderDice();save()}
+ else if(t.dataset.d!==undefined){const i=+t.dataset.d;S.dice.v[i]=d(20);S.dice.r=true;renderDice();save()}
+ else if(t.id==='keep'){S.pool.push(S.dice.v.reduce((a,b)=>a+b,0));S.dice=null;S.sel=S.pool.length-1;renderDice();renderPool();save()}
+ else if(t.dataset.pool!==undefined){S.sel=S.sel===+t.dataset.pool?-1:+t.dataset.pool;renderPool()}
+ else if(t.id==='poolClr'){S.pool=[];S.sel=-1;renderDice();renderPool();save()}
+ else if(t.dataset.use){
+  if(S.sel<0)return;
+  S.base[t.dataset.use]=Math.min(100,S.pool[S.sel]);S.pool.splice(S.sel,1);S.sel=-1;
+  document.querySelector(`[data-b="${t.dataset.use}"]`).value=S.base[t.dataset.use];renderDice();renderPool();update();
+ }
+ else if(t.dataset.pip){const n=+t.dataset.pip;S.fluxo=S.fluxo===n?n-1:n;if(!fluxoOn())S.fAttrs=[];update()}
+ else if(t.id==='fzero'){S.fluxo=0;S.fAttrs=[];update()}
+ else if(t.id==='reacao'){S.reacao=!S.reacao;update()}
+ else if(t.id==='sortear'){if(!S.arma.tipo)return;const l=P[S.arma.tipo];S.arma.par=l[d(l.length)-1];$('armaPar').value=S.arma.par;update()}
+ else if(t.id==='testar'){
+  const a=$('tAttr').value,p=$('tPar').value,r=d(20),cb=buff(a),pm=p?pv(p):0,rb=rank(total(a))[2],fx=fluxoOn()&&S.fAttrs.includes(a)?10:0;
+  const tt=cb+rb+pm+r+fx;
+  $('tRes').textContent=`d20 ${r} → Total ${tt}`;
+  S.log.unshift(`<b>${tt}</b> = ${a}: classe ${cb>=0?'+':''}${cb} + rank ${rb>=0?'+':''}${rb} + ${p||'—'} ${pm} + d20 ${r}${fx?' + Fluxo 10':''}`);
+  S.log=S.log.slice(0,30);renderLog();save();
+ }
+ else if(t.id==='reset'){if(confirm('Apagar toda a ficha?')){S=fresh();sync()}}
+ else if(t.id==='tema'){const r=document.documentElement,dk=matchMedia('(prefers-color-scheme:dark)').matches;
+  const cur=r.dataset.theme||(dk?'dark':'light');r.dataset.theme=cur==='dark'?'light':'dark'}
+});
+sync();
+</script>
+</body>
+</html>
